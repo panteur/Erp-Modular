@@ -47,8 +47,9 @@ class ApiClient {
     const response = await fetch(url, config);
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Error desconocido' }));
-      throw new Error(error.error || `HTTP ${response.status}`);
+      const body = await response.json().catch(() => ({}));
+      const message = body.error || (body.errors && body.errors.map((e: any) => e.msg).join(', ')) || `Error ${response.status}`;
+      throw new Error(message);
     }
 
     return response.json();
