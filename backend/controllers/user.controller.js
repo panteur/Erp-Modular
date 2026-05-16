@@ -1,6 +1,13 @@
-const { User, Role, Company, Branch } = require('../models');
-const { hashPassword } = require('../utils/password');
+const { User, UserProfile, Role, Company, Branch } = require('../models');
+const { hashPassword, comparePassword } = require('../utils/password');
 const { Op } = require('sequelize');
+
+const userIncludes = [
+  { model: Role, as: 'role', attributes: ['id', 'name'] },
+  { model: Company, as: 'company', attributes: ['id', 'name'] },
+  { model: Branch, as: 'branch', attributes: ['id', 'name'] },
+  { model: UserProfile, as: 'profile' }
+];
 
 const getAll = async (req, res) => {
   try {
@@ -8,15 +15,15 @@ const getAll = async (req, res) => {
     const offset = (page - 1) * limit;
 
     const where = {};
-    
+
     if (search) {
       where[Op.or] = [
         { email: { [Op.like]: `%${search}%` } },
-        { first_name: { [Op.like]: `%${search}%` } },
-        { last_name: { [Op.like]: `%${search}%` } }
+        { '$profile.first_name$': { [Op.like]: `%${search}%` } },
+        { '$profile.last_name$': { [Op.like]: `%${search}%` } }
       ];
     }
-    
+
     if (company_id) where.company_id = company_id;
     if (branch_id) where.branch_id = branch_id;
     if (is_active !== undefined) where.is_active = is_active === 'true';
@@ -26,11 +33,7 @@ const getAll = async (req, res) => {
       limit: parseInt(limit),
       offset: parseInt(offset),
       attributes: { exclude: ['password_hash'] },
-      include: [
-        { model: Role, as: 'role', attributes: ['id', 'name'] },
-        { model: Company, as: 'company', attributes: ['id', 'name'] },
-        { model: Branch, as: 'branch', attributes: ['id', 'name'] }
-      ],
+      include: userIncludes,
       order: [['created_at', 'DESC']]
     });
 
@@ -53,11 +56,7 @@ const getById = async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id, {
       attributes: { exclude: ['password_hash'] },
-      include: [
-        { model: Role, as: 'role' },
-        { model: Company, as: 'company' },
-        { model: Branch, as: 'branch' }
-      ]
+      include: userIncludes
     });
 
     if (!user) {
@@ -73,7 +72,7 @@ const getById = async (req, res) => {
 
 const create = async (req, res) => {
   try {
-    const { email, password, first_name, last_name, phone, role_id, company_id, branch_id } = req.body;
+    const { email, password, first_name, last_name, phone, document_type, document_number, role_id, company_id, branch_id } = req.body;
 
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
@@ -85,22 +84,24 @@ const create = async (req, res) => {
     const user = await User.create({
       email,
       password_hash: passwordHash,
-      first_name,
-      last_name,
-      phone,
       role_id,
       company_id: company_id || req.user.company_id,
       branch_id,
       is_active: true
     });
 
+    await UserProfile.create({
+      user_id: user.id,
+      first_name,
+      last_name,
+      phone,
+      document_type,
+      document_number
+    });
+
     const userWithRelations = await User.findByPk(user.id, {
       attributes: { exclude: ['password_hash'] },
-      include: [
-        { model: Role, as: 'role' },
-        { model: Company, as: 'company' },
-        { model: Branch, as: 'branch' }
-      ]
+      include: userIncludes
     });
 
     res.status(201).json({ user: userWithRelations });
@@ -112,9 +113,11 @@ const create = async (req, res) => {
 
 const update = async (req, res) => {
   try {
-    const { email, first_name, last_name, phone, role_id, branch_id, is_active } = req.body;
+    const { email, first_name, last_name, phone, document_type, document_number, role_id, branch_id, is_active } = req.body;
 
-    const user = await User.findByPk(req.params.id);
+    const user = await User.findByPk(req.params.id, {
+      include: [{ model: UserProfile, as: 'profile' }]
+    });
     if (!user) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
@@ -128,21 +131,24 @@ const update = async (req, res) => {
 
     await user.update({
       email: email || user.email,
-      first_name: first_name !== undefined ? first_name : user.first_name,
-      last_name: last_name !== undefined ? last_name : user.last_name,
-      phone: phone !== undefined ? phone : user.phone,
       role_id: role_id || user.role_id,
       branch_id: branch_id !== undefined ? branch_id : user.branch_id,
       is_active: is_active !== undefined ? is_active : user.is_active
     });
 
+    if (user.profile) {
+      await user.profile.update({
+        first_name: first_name !== undefined ? first_name : user.profile.first_name,
+        last_name: last_name !== undefined ? last_name : user.profile.last_name,
+        phone: phone !== undefined ? phone : user.profile.phone,
+        document_type: document_type !== undefined ? document_type : user.profile.document_type,
+        document_number: document_number !== undefined ? document_number : user.profile.document_number,
+      });
+    }
+
     const updatedUser = await User.findByPk(user.id, {
       attributes: { exclude: ['password_hash'] },
-      include: [
-        { model: Role, as: 'role' },
-        { model: Company, as: 'company' },
-        { model: Branch, as: 'branch' }
-      ]
+      include: userIncludes
     });
 
     res.json({ user: updatedUser });
@@ -162,7 +168,7 @@ const changePassword = async (req, res) => {
     }
 
     const isCurrentUser = req.userId === user.id || req.user.role.name === 'admin';
-    
+
     if (isCurrentUser) {
       const isValid = await comparePassword(current_password, user.password_hash);
       if (!isValid) {
@@ -195,8 +201,6 @@ const remove = async (req, res) => {
     res.status(500).json({ error: 'Error desactivando usuario' });
   }
 };
-
-const comparePassword = require('../utils/password').comparePassword;
 
 module.exports = {
   getAll,

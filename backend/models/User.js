@@ -40,18 +40,6 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING(255),
     allowNull: false
   },
-  first_name: {
-    type: DataTypes.STRING(100)
-  },
-  last_name: {
-    type: DataTypes.STRING(100)
-  },
-  phone: {
-    type: DataTypes.STRING(20)
-  },
-  avatar: {
-    type: DataTypes.STRING(255)
-  },
   is_active: {
     type: DataTypes.BOOLEAN,
     defaultValue: true

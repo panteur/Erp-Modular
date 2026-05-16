@@ -4,11 +4,17 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { authAPI } from '@/lib/api';
 import { useRouter, usePathname } from 'next/navigation';
 
+interface UserProfile {
+  first_name: string;
+  last_name: string;
+  phone: string;
+  avatar?: string;
+}
+
 interface User {
   id: number;
   email: string;
-  first_name: string;
-  last_name: string;
+  profile: UserProfile | null;
   role: {
     id: number;
     name: string;

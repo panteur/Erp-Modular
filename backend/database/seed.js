@@ -1,5 +1,5 @@
 const sequelize = require('./connection');
-const { Company, Branch, SystemModule, Role, User } = require('../models');
+const { Company, Branch, SystemModule, Role, User, UserProfile } = require('../models');
 const { hashPassword } = require('../utils/password');
 
 const seed = async () => {
@@ -71,16 +71,20 @@ const seed = async () => {
 
     console.log('Creando usuario administrador...');
     const adminPassword = await hashPassword('admin123');
-    await User.create({
+    const adminUser = await User.create({
       company_id: company.id,
       branch_id: branch.id,
       role_id: adminRole.id,
       email: 'admin@miempresa.com',
       password_hash: adminPassword,
+      is_active: true
+    });
+
+    await UserProfile.create({
+      user_id: adminUser.id,
       first_name: 'Administrador',
       last_name: 'Sistema',
-      phone: '+57 300 123 4567',
-      is_active: true
+      phone: '+57 300 123 4567'
     });
 
     console.log('Seed completado exitosamente');

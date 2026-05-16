@@ -1,4 +1,4 @@
-const { User, Role, Company, Branch, UserSession } = require('../models');
+const { User, UserProfile, Role, Company, Branch, UserSession } = require('../models');
 const { comparePassword } = require('../utils/password');
 const { generateAccessToken, generateRefreshToken, verifyToken } = require('../utils/jwt');
 const crypto = require('crypto');
@@ -11,7 +11,8 @@ const login = async (req, res) => {
       where: { email },
       include: [
         { model: Role, as: 'role' },
-        { model: Company, as: 'company' }
+        { model: Company, as: 'company' },
+        { model: UserProfile, as: 'profile' }
       ]
     });
 
@@ -51,8 +52,12 @@ const login = async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        first_name: user.first_name,
-        last_name: user.last_name,
+        profile: user.profile ? {
+          first_name: user.profile.first_name,
+          last_name: user.profile.last_name,
+          phone: user.profile.phone,
+          avatar: user.profile.avatar
+        } : null,
         role: user.role ? {
           id: user.role.id,
           name: user.role.name,
@@ -135,7 +140,8 @@ const me = async (req, res) => {
       include: [
         { model: Role, as: 'role' },
         { model: Company, as: 'company' },
-        { model: Branch, as: 'branch' }
+        { model: Branch, as: 'branch' },
+        { model: UserProfile, as: 'profile' }
       ]
     });
 

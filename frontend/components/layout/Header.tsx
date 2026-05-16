@@ -11,7 +11,7 @@ export default function Header() {
       <div className="flex items-center justify-between px-6 py-4">
         <div>
           <h2 className="text-xl font-semibold text-gray-800">
-            Bienvenido, {user?.first_name}
+            Bienvenido,             {user?.profile?.first_name || 'Usuario'}
           </h2>
         </div>
         <div className="flex items-center gap-4">

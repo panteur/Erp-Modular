@@ -5,12 +5,19 @@ import { usersAPI, rolesAPI } from '@/lib/api';
 import { Button, Input, Select, Modal, Card } from '@/components/ui';
 import { Table, TableRow, TableCell } from '@/components/ui';
 
-interface User {
-  id: number;
-  email: string;
+interface UserProfile {
   first_name: string;
   last_name: string;
   phone: string;
+  document_type: string;
+  document_number: string;
+  address: string;
+}
+
+interface User {
+  id: number;
+  email: string;
+  profile: UserProfile | null;
   is_active: boolean;
   role: { id: number; name: string };
   company: { id: number; name: string };
@@ -28,13 +35,15 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     first_name: '',
     last_name: '',
     phone: '',
+    document_type: '',
+    document_number: '',
     role_id: '',
     branch_id: '',
   });
@@ -79,9 +88,11 @@ export default function UsersPage() {
     setFormData({
       email: user.email,
       password: '',
-      first_name: user.first_name || '',
-      last_name: user.last_name || '',
-      phone: user.phone || '',
+      first_name: user.profile?.first_name || '',
+      last_name: user.profile?.last_name || '',
+      phone: user.profile?.phone || '',
+      document_type: user.profile?.document_type || '',
+      document_number: user.profile?.document_number || '',
       role_id: user.role.id.toString(),
       branch_id: user.branch?.id.toString() || '',
     });
@@ -106,6 +117,8 @@ export default function UsersPage() {
       first_name: '',
       last_name: '',
       phone: '',
+      document_type: '',
+      document_number: '',
       role_id: '',
       branch_id: '',
     });
@@ -132,7 +145,7 @@ export default function UsersPage() {
           {users.map((user) => (
             <TableRow key={user.id}>
               <TableCell className="font-medium">
-                {user.first_name} {user.last_name}
+                {user.profile?.first_name} {user.profile?.last_name}
               </TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>
@@ -143,8 +156,8 @@ export default function UsersPage() {
               <TableCell>{user.branch?.name || 'Todas'}</TableCell>
               <TableCell>
                 <span className={`px-2 py-1 rounded-full text-xs ${
-                  user.is_active 
-                    ? 'bg-green-100 text-green-800' 
+                  user.is_active
+                    ? 'bg-green-100 text-green-800'
                     : 'bg-red-100 text-red-800'
                 }`}>
                   {user.is_active ? 'Activo' : 'Inactivo'}
@@ -220,6 +233,25 @@ export default function UsersPage() {
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
           />
+          <div className="grid grid-cols-2 gap-4">
+            <Select
+              label="Tipo Documento"
+              value={formData.document_type}
+              onChange={(e) => setFormData({ ...formData, document_type: e.target.value })}
+              options={[
+                { value: '', label: 'Seleccionar...' },
+                { value: 'CC', label: 'Cédula de Ciudadanía' },
+                { value: 'CE', label: 'Cédula de Extranjería' },
+                { value: 'NIT', label: 'NIT' },
+                { value: 'PASSPORT', label: 'Pasaporte' },
+              ]}
+            />
+            <Input
+              label="Número Documento"
+              value={formData.document_number}
+              onChange={(e) => setFormData({ ...formData, document_number: e.target.value })}
+            />
+          </div>
           <Select
             label="Rol"
             value={formData.role_id}
