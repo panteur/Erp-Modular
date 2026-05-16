@@ -6,27 +6,35 @@ Sistema de gestión empresarial modular con arquitectura frontend-backend separa
 
 - **Frontend**: Next.js 14 + React + Tailwind CSS
 - **Backend**: Node.js + Express
-- **Base de datos**: MySQL/MariaDB
+- **Base de datos**: MySQL/MariaDB (instalación local)
 
 ## Requisitos
 
 - Node.js 18+
-- Docker (para MariaDB)
+- MariaDB o MySQL instalado localmente
 - Git
 
-## Instalación
+## Instalación de Base de Datos
 
-### 1. Clonar el repositorio
+### 1. Crear base de datos en MariaDB/MySQL
+
+```sql
+CREATE DATABASE erp_modular CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'root'@'localhost' IDENTIFIED BY 'Panteur7899968@';
+GRANT ALL PRIVILEGES ON erp_modular.* TO 'root'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+O desde terminal:
+```bash
+mysql -u root -p -e "CREATE DATABASE erp_modular;"
+```
+
+### 2. Clonar el repositorio
 
 ```bash
 git clone https://github.com/panteur/Erp-Modular.git
 cd Erp-Modular
-```
-
-### 2. Configurar base de datos (Docker)
-
-```bash
-docker-compose up -d
 ```
 
 ### 3. Configurar Backend
@@ -72,7 +80,6 @@ Erp-Modular/
 │   ├── context/       # Contextos React
 │   ├── lib/           # Utilidades API
 │   └── hooks/         # Custom hooks
-├── docker-compose.yml # Config MariaDB
 └── README.md
 ```
 
@@ -87,7 +94,10 @@ DB_PORT=3306
 DB_NAME=erp_modular
 DB_USER=root
 DB_PASSWORD=Panteur7899968@
-JWT_SECRET=your-secret-key
+JWT_SECRET=erp-modular-secret-key-2024
+JWT_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
+BCRYPT_SALT_ROUNDS=10
 ```
 
 ### Frontend (frontend/.env.local)
