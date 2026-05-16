@@ -1,6 +1,7 @@
 const { User, UserProfile, Role, Company, Branch, UserSession } = require('../models');
 const { hashPassword, comparePassword } = require('../utils/password');
 const { validateRUT } = require('../utils/rut');
+const { sendMail } = require('../utils/mail');
 const { Op } = require('sequelize');
 
 const userIncludes = [
@@ -105,6 +106,33 @@ const create = async (req, res) => {
       document_type,
       document_number
     });
+
+    sendMail({
+      to: email,
+      subject: 'Bienvenido al ERP Modular',
+      html: `
+        <div style="font-family:Arial;max-width:600px;margin:auto">
+          <div style="background:#2563eb;color:white;padding:24px;text-align:center;border-radius:8px 8px 0 0">
+            <h1 style="margin:0">ERP Modular</h1>
+          </div>
+          <div style="padding:32px;background:#f8fafc;border:1px solid #e2e8f0">
+            <h2>Hola ${first_name || ''},</h2>
+            <p>Tu cuenta ha sido creada en el sistema ERP Modular.</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p style="color:#64748b;font-size:14px">Tu contraseña fue configurada por el administrador.</p>
+            <p style="text-align:center;margin-top:24px">
+              <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/login"
+                 style="background:#2563eb;color:white;padding:12px 32px;border-radius:6px;text-decoration:none">
+                Iniciar Sesión
+              </a>
+            </p>
+          </div>
+          <div style="text-align:center;padding:16px;color:#94a3b8;font-size:12px">
+            ERP Modular - Sistema de Gestión Empresarial
+          </div>
+        </div>
+      `
+    }).catch(err => console.error('Welcome email failed:', err));
 
     const userWithRelations = await User.findByPk(user.id, {
       attributes: { exclude: ['password_hash'] },
