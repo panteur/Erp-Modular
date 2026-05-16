@@ -29,12 +29,54 @@ interface Role {
   name: string;
 }
 
+const RUT_REGEX = /^(\d{1,3}(?:\.?\d{3}){0,2}-?[0-9Kk])$/;
+
+const validateRUT = (rut: string): boolean => {
+  const cleaned = rut.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+  if (!/^\d+[0-9K]$/.test(cleaned)) return false;
+
+  const body = cleaned.slice(0, -1);
+  const dv = cleaned.slice(-1);
+
+  let sum = 0;
+  let multiplier = 2;
+  for (let i = body.length - 1; i >= 0; i--) {
+    sum += parseInt(body[i]) * multiplier;
+    multiplier = multiplier === 7 ? 2 : multiplier + 1;
+  }
+
+  const remainder = 11 - (sum % 11);
+  let expectedDV;
+  if (remainder === 11) expectedDV = '0';
+  else if (remainder === 10) expectedDV = 'K';
+  else expectedDV = remainder.toString();
+
+  return expectedDV === dv;
+};
+
+const formatRUT = (value: string): string => {
+  const cleaned = value.replace(/\./g, '').replace(/-/g, '');
+  if (cleaned.length <= 1) return cleaned;
+  const body = cleaned.slice(0, -1);
+  const dv = cleaned.slice(-1);
+  const formatted = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return `${formatted}-${dv}`;
+};
+
+const DOCUMENT_OPTIONS = [
+  { value: '', label: 'Seleccionar...' },
+  { value: 'RUT', label: 'RUT (Chile)' },
+  { value: 'PASSPORT', label: 'Pasaporte' },
+  { value: 'DNI', label: 'DNI Extranjero' },
+];
+
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [documentError, setDocumentError] = useState('');
 
   const [formData, setFormData] = useState({
     email: '',
@@ -67,13 +109,42 @@ export default function UsersPage() {
     }
   };
 
+  const handleDocumentChange = (value: string) => {
+    setFormData({ ...formData, document_type: value, document_number: '' });
+    setDocumentError('');
+  };
+
+  const handleDocumentNumberChange = (value: string) => {
+    const cleaned = value.replace(/[^0-9kK\-\.]/g, '');
+    const formatted = formData.document_type === 'RUT' ? formatRUT(cleaned) : cleaned;
+    setFormData({ ...formData, document_number: formatted });
+    setDocumentError('');
+  };
+
+  const validateForm = (): boolean => {
+    if (formData.document_type === 'RUT' && formData.document_number) {
+      if (!validateRUT(formData.document_number)) {
+        setDocumentError('RUT inválido - verifique el dígito verificador');
+        return false;
+      }
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
+    const submitData = {
+      ...formData,
+      document_number: formData.document_number.replace(/\./g, '').replace(/-/g, ''),
+    };
+
     try {
       if (editingUser) {
-        await usersAPI.update(editingUser.id, formData);
+        await usersAPI.update(editingUser.id, submitData);
       } else {
-        await usersAPI.create(formData);
+        await usersAPI.create(submitData);
       }
       setIsModalOpen(false);
       loadData();
@@ -96,6 +167,7 @@ export default function UsersPage() {
       role_id: user.role.id.toString(),
       branch_id: user.branch?.id.toString() || '',
     });
+    setDocumentError('');
     setIsModalOpen(true);
   };
 
@@ -122,6 +194,7 @@ export default function UsersPage() {
       role_id: '',
       branch_id: '',
     });
+    setDocumentError('');
   };
 
   const openCreateModal = () => {
@@ -237,20 +310,20 @@ export default function UsersPage() {
             <Select
               label="Tipo Documento"
               value={formData.document_type}
-              onChange={(e) => setFormData({ ...formData, document_type: e.target.value })}
-              options={[
-                { value: '', label: 'Seleccionar...' },
-                { value: 'CC', label: 'Cédula de Ciudadanía' },
-                { value: 'CE', label: 'Cédula de Extranjería' },
-                { value: 'NIT', label: 'NIT' },
-                { value: 'PASSPORT', label: 'Pasaporte' },
-              ]}
+              onChange={(e) => handleDocumentChange(e.target.value)}
+              options={DOCUMENT_OPTIONS}
             />
-            <Input
-              label="Número Documento"
-              value={formData.document_number}
-              onChange={(e) => setFormData({ ...formData, document_number: e.target.value })}
-            />
+            <div>
+              <Input
+                label="Número Documento"
+                value={formData.document_number}
+                onChange={(e) => handleDocumentNumberChange(e.target.value)}
+                placeholder={formData.document_type === 'RUT' ? '12.345.678-5' : ''}
+              />
+              {documentError && (
+                <p className="text-red-500 text-xs mt-1">{documentError}</p>
+              )}
+            </div>
           </div>
           <Select
             label="Rol"

@@ -2,6 +2,7 @@ require('dotenv').config();
 
 module.exports = {
   port: process.env.PORT || 4000,
+  timezone: process.env.TZ || 'America/Santiago',
   database: {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
@@ -9,6 +10,7 @@ module.exports = {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     dialect: 'mysql',
+    timezone: process.env.TZ || 'America/Santiago',
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
     pool: {
       max: 5,

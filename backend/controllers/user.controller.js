@@ -1,5 +1,6 @@
 const { User, UserProfile, Role, Company, Branch } = require('../models');
 const { hashPassword, comparePassword } = require('../utils/password');
+const { validateRUT } = require('../utils/rut');
 const { Op } = require('sequelize');
 
 const userIncludes = [
@@ -79,6 +80,12 @@ const create = async (req, res) => {
       return res.status(400).json({ error: 'El email ya está registrado' });
     }
 
+    if (document_type === 'RUT') {
+      if (!document_number || !validateRUT(document_number)) {
+        return res.status(400).json({ error: 'RUT chileno inválido' });
+      }
+    }
+
     const passwordHash = await hashPassword(password);
 
     const user = await User.create({
@@ -127,6 +134,12 @@ const update = async (req, res) => {
       if (existingUser) {
         return res.status(400).json({ error: 'El email ya está registrado' });
       }
+    }
+
+    const docType = document_type !== undefined ? document_type : user.profile?.document_type;
+    const docNumber = document_number !== undefined ? document_number : user.profile?.document_number;
+    if (docType === 'RUT' && docNumber && !validateRUT(docNumber)) {
+      return res.status(400).json({ error: 'RUT chileno inválido' });
     }
 
     await user.update({

@@ -8,7 +8,8 @@ module.exports = {
       autorestart: true,
       watch: false,
       env: {
-        NODE_ENV: "development"
+        NODE_ENV: "development",
+        TZ: "America/Santiago"
       }
     },
     {
@@ -20,7 +21,8 @@ module.exports = {
       autorestart: true,
       watch: false,
       env: {
-        NODE_ENV: "development"
+        NODE_ENV: "development",
+        TZ: "America/Santiago"
       }
     }
   ]
