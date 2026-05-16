@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usersAPI, rolesAPI, authAPI } from '@/lib/api';
+import { usersAPI, rolesAPI, branchesAPI, authAPI } from '@/lib/api';
 import { Button, Input, Select, Modal, Card } from '@/components/ui';
 import { Table, TableRow, TableCell } from '@/components/ui';
 
@@ -71,6 +71,7 @@ const DOCUMENT_OPTIONS = [
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [branches, setBranches] = useState<{ id: number; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -93,12 +94,14 @@ export default function UsersPage() {
 
   const loadData = async () => {
     try {
-      const [usersRes, rolesRes] = await Promise.all([
+      const [usersRes, rolesRes, branchesRes] = await Promise.all([
         usersAPI.getAll(),
         rolesAPI.getAll(),
+        branchesAPI.getAll(),
       ]);
       setUsers(usersRes.users);
       setRoles(rolesRes.roles);
+      setBranches(branchesRes.branches);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -381,6 +384,15 @@ export default function UsersPage() {
             options={[
               { value: '', label: 'Seleccione rol' },
               ...roles.map((r) => ({ value: r.id.toString(), label: r.name }))
+            ]}
+          />
+          <Select
+            label="Sucursal"
+            value={formData.branch_id}
+            onChange={(e) => setFormData({ ...formData, branch_id: e.target.value })}
+            options={[
+              { value: '', label: 'Todas las sucursales' },
+              ...branches.map((b) => ({ value: b.id.toString(), label: b.name }))
             ]}
           />
         </form>
