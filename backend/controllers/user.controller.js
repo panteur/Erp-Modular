@@ -75,7 +75,7 @@ const getById = async (req, res) => {
 
 const create = async (req, res) => {
   try {
-    const { email, password, first_name, last_name, phone, document_type, document_number, role_id, company_id, branch_id } = req.body;
+    const { email, first_name, last_name, phone, document_type, document_number, role_id, company_id, branch_id } = req.body;
 
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
@@ -88,7 +88,8 @@ const create = async (req, res) => {
       }
     }
 
-    const passwordHash = await hashPassword(password);
+    const tempPassword = require('crypto').randomBytes(32).toString('hex');
+    const passwordHash = await hashPassword(tempPassword);
 
     const user = await User.create({
       email,
@@ -108,9 +109,12 @@ const create = async (req, res) => {
       document_number
     });
 
+    const resetToken = generateResetToken(user);
+    const setPasswordUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/reset-password?token=${resetToken}`;
+
     sendMail({
       to: email,
-      subject: 'Bienvenido al ERP Modular',
+      subject: 'Tu cuenta ha sido creada - ERP Modular',
       html: `
         <div style="font-family:Arial;max-width:600px;margin:auto">
           <div style="background:#2563eb;color:white;padding:24px;text-align:center;border-radius:8px 8px 0 0">
@@ -120,12 +124,15 @@ const create = async (req, res) => {
             <h2>Hola ${first_name || ''},</h2>
             <p>Tu cuenta ha sido creada en el sistema ERP Modular.</p>
             <p><strong>Email:</strong> ${email}</p>
-            <p style="color:#64748b;font-size:14px">Tu contraseña fue configurada por el administrador.</p>
+            <p>Para acceder, debes crear tu contraseña usando el siguiente enlace. Este enlace es válido por <strong>15 minutos</strong>.</p>
             <p style="text-align:center;margin-top:24px">
-              <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/login"
-                 style="background:#2563eb;color:white;padding:12px 32px;border-radius:6px;text-decoration:none">
-                Iniciar Sesión
+              <a href="${setPasswordUrl}"
+                 style="background:#2563eb;color:white;padding:12px 32px;border-radius:6px;text-decoration:none;display:inline-block">
+                Crear Contraseña
               </a>
+            </p>
+            <p style="color:#94a3b8;font-size:13px;margin-top:24px">
+              Si no esperabas esta invitación, puedes ignorar este correo.
             </p>
           </div>
           <div style="text-align:center;padding:16px;color:#94a3b8;font-size:12px">

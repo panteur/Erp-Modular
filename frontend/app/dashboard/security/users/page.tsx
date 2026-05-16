@@ -78,7 +78,6 @@ export default function UsersPage() {
 
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
     first_name: '',
     last_name: '',
     phone: '',
@@ -167,11 +166,10 @@ export default function UsersPage() {
     setEditingUser(user);
     setFormData({
       email: user.email,
-      password: '',
       first_name: user.profile?.first_name || '',
       last_name: user.profile?.last_name || '',
       phone: user.profile?.phone || '',
-      document_type: user.profile?.document_type || '',
+      document_type: user.profile?.document_type || 'RUT',
       document_number: user.profile?.document_number || '',
       role_id: user.role.id.toString(),
       branch_id: user.branch?.id.toString() || '',
@@ -204,7 +202,6 @@ export default function UsersPage() {
     setEditingUser(null);
     setFormData({
       email: '',
-      password: '',
       first_name: '',
       last_name: '',
       phone: '',
@@ -310,16 +307,6 @@ export default function UsersPage() {
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             required
           />
-          {!editingUser && (
-            <Input
-              label="Contraseña"
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              autoComplete="new-password"
-              required
-            />
-          )}
           <div className="grid grid-cols-2 gap-4">
             <Input
               label="Nombre"
