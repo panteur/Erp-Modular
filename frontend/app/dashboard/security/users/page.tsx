@@ -141,16 +141,23 @@ export default function UsersPage() {
     e.preventDefault();
     if (!validateForm()) return;
 
+    if (!formData.role_id) {
+      return alert('Debes seleccionar un rol');
+    }
+
     const submitData: Record<string, any> = {
-      ...formData,
+      email: formData.email,
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      phone: formData.phone,
+      document_type: formData.document_type,
       document_number: formData.document_number
         ? formData.document_number.replace(/\./g, '').replace(/-/g, '')
         : '',
+      role_id: formData.role_id,
     };
 
-    for (const key of Object.keys(submitData)) {
-      if (submitData[key] === '') delete submitData[key];
-    }
+    if (formData.branch_id) submitData.branch_id = formData.branch_id;
 
     try {
       if (editingUser) {
