@@ -86,6 +86,7 @@ export default function UsersPage() {
     document_number: '',
     role_id: '',
     branch_id: '',
+    is_active: true,
   });
 
   useEffect(() => {
@@ -162,6 +163,8 @@ export default function UsersPage() {
 
     if (formData.branch_id) submitData.branch_id = formData.branch_id;
 
+    if (editingUser) submitData.is_active = formData.is_active;
+
     try {
       if (editingUser) {
         await usersAPI.update(editingUser.id, submitData);
@@ -187,9 +190,21 @@ export default function UsersPage() {
       document_number: user.profile?.document_number || '',
       role_id: user.role.id.toString(),
       branch_id: user.branch?.id.toString() || '',
+      is_active: user.is_active,
     });
     setDocumentError('');
     setIsModalOpen(true);
+  };
+
+  const handleToggleActive = async (user: User) => {
+    const action = user.is_active ? 'desactivar' : 'activar';
+    if (!confirm(`¿Estás seguro de ${action} este usuario?`)) return;
+    try {
+      await usersAPI.update(user.id, { is_active: !user.is_active });
+      loadData();
+    } catch (error: any) {
+      alert(error.message || 'Error al cambiar estado');
+    }
   };
 
   const handleDelete = async (id: number) => {
@@ -223,6 +238,7 @@ export default function UsersPage() {
       document_number: '',
       role_id: '',
       branch_id: '',
+      is_active: true,
     });
     setDocumentError('');
   };
@@ -263,13 +279,16 @@ export default function UsersPage() {
               </TableCell>
               <TableCell>{user.branch?.name || 'Todas'}</TableCell>
               <TableCell>
-                <span className={`px-2 py-1 rounded-full text-xs ${
-                  user.is_active
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-red-100 text-red-800'
-                }`}>
+                <button
+                  onClick={() => handleToggleActive(user)}
+                  className={`px-2 py-1 rounded-full text-xs cursor-pointer ${
+                    user.is_active
+                      ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                      : 'bg-red-100 text-red-800 hover:bg-red-200'
+                  }`}
+                >
                   {user.is_active ? 'Activo' : 'Inactivo'}
-                </span>
+                </button>
               </TableCell>
               <TableCell>
                 <div className="flex gap-2">
@@ -395,6 +414,17 @@ export default function UsersPage() {
               ...branches.map((b) => ({ value: b.id.toString(), label: b.name }))
             ]}
           />
+          {editingUser && (
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.is_active}
+                onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="text-sm font-medium text-gray-700">Usuario activo</span>
+            </label>
+          )}
         </form>
       </Modal>
     </div>
