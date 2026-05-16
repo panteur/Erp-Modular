@@ -1,4 +1,4 @@
-const { User, Role, Company, UserSession } = require('../models');
+const { User, Role, Company, Branch, UserSession } = require('../models');
 const { comparePassword } = require('../utils/password');
 const { generateAccessToken, generateRefreshToken, verifyToken } = require('../utils/jwt');
 const crypto = require('crypto');
