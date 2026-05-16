@@ -141,12 +141,16 @@ export default function UsersPage() {
     e.preventDefault();
     if (!validateForm()) return;
 
-    const submitData = {
+    const submitData: Record<string, any> = {
       ...formData,
       document_number: formData.document_number
         ? formData.document_number.replace(/\./g, '').replace(/-/g, '')
         : '',
     };
+
+    for (const key of Object.keys(submitData)) {
+      if (submitData[key] === '') delete submitData[key];
+    }
 
     try {
       if (editingUser) {
