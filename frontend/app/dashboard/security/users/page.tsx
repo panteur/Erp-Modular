@@ -378,7 +378,10 @@ export default function UsersPage() {
             label="Rol"
             value={formData.role_id}
             onChange={(e) => setFormData({ ...formData, role_id: e.target.value })}
-            options={roles.map((r) => ({ value: r.id.toString(), label: r.name }))}
+            options={[
+              { value: '', label: 'Seleccione rol' },
+              ...roles.map((r) => ({ value: r.id.toString(), label: r.name }))
+            ]}
           />
         </form>
       </Modal>

@@ -154,7 +154,7 @@ const create = async (req, res) => {
       ? 'El email ya está registrado'
       : error.name === 'SequelizeForeignKeyConstraintError'
         ? 'Valor de referencia inválido (role_id, company_id o branch_id)'
-        : 'Error creando usuario';
+        : `Error: ${error.message}`;
     res.status(500).json({ error: message });
   }
 };
