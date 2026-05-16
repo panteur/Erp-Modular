@@ -150,7 +150,12 @@ const create = async (req, res) => {
     res.status(201).json({ user: userWithRelations });
   } catch (error) {
     console.error('Create user error:', error);
-    res.status(500).json({ error: 'Error creando usuario' });
+    const message = error.name === 'SequelizeUniqueConstraintError'
+      ? 'El email ya está registrado'
+      : error.name === 'SequelizeForeignKeyConstraintError'
+        ? 'Valor de referencia inválido (role_id, company_id o branch_id)'
+        : 'Error creando usuario';
+    res.status(500).json({ error: message });
   }
 };
 
