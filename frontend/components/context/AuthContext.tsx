@@ -76,7 +76,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await authAPI.logout();
+      const refresh_token = localStorage.getItem('refresh_token');
+      if (refresh_token) {
+        await authAPI.logout(refresh_token);
+      }
     } catch (error) {
       console.error('Logout error:', error);
     } finally {

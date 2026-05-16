@@ -7,7 +7,8 @@ const generateAccessToken = (user) => {
       id: user.id,
       email: user.email,
       company_id: user.company_id,
-      role_id: user.role_id
+      role_id: user.role_id,
+      type: 'access'
     },
     config.jwt.secret,
     { expiresIn: config.jwt.expiresIn }
@@ -15,10 +16,12 @@ const generateAccessToken = (user) => {
 };
 
 const generateRefreshToken = (user) => {
+  const crypto = require('crypto');
   return jwt.sign(
     {
       id: user.id,
-      type: 'refresh'
+      type: 'refresh',
+      jti: crypto.randomUUID()
     },
     config.jwt.secret,
     { expiresIn: config.jwt.refreshExpiresIn }

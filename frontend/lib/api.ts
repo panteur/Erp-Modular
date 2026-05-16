@@ -76,7 +76,7 @@ export const api = new ApiClient(API_URL);
 export const authAPI = {
   login: (email: string, password: string) => 
     api.post<{ access_token: string; refresh_token: string; user: any }>('/auth/login', { email, password }),
-  logout: () => api.post('/auth/logout'),
+  logout: (refresh_token: string) => api.post('/auth/logout', { refresh_token }),
   refresh: (refresh_token: string) => 
     api.post<{ access_token: string; refresh_token: string }>('/auth/refresh', { refresh_token }),
   me: () => api.get<{ user: any }>('/auth/me'),

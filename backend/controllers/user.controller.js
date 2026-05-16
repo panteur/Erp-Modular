@@ -1,4 +1,4 @@
-const { User, UserProfile, Role, Company, Branch } = require('../models');
+const { User, UserProfile, Role, Company, Branch, UserSession } = require('../models');
 const { hashPassword, comparePassword } = require('../utils/password');
 const { validateRUT } = require('../utils/rut');
 const { Op } = require('sequelize');
@@ -192,7 +192,9 @@ const changePassword = async (req, res) => {
     const passwordHash = await hashPassword(new_password);
     await user.update({ password_hash: passwordHash });
 
-    res.json({ message: 'Contraseña actualizada correctamente' });
+    await UserSession.destroy({ where: { user_id: user.id } });
+
+    res.json({ message: 'Contraseña actualizada correctamente. Se cerraron todas las sesiones activas.' });
   } catch (error) {
     console.error('Change password error:', error);
     res.status(500).json({ error: 'Error cambiando contraseña' });
