@@ -64,10 +64,8 @@ const formatRUT = (value: string): string => {
 };
 
 const DOCUMENT_OPTIONS = [
-  { value: '', label: 'Seleccionar...' },
   { value: 'RUT', label: 'RUT (Chile)' },
-  { value: 'PASSPORT', label: 'Pasaporte' },
-  { value: 'DNI', label: 'DNI Extranjero' },
+  { value: 'OTRA', label: 'Otra' },
 ];
 
 export default function UsersPage() {
@@ -84,7 +82,7 @@ export default function UsersPage() {
     first_name: '',
     last_name: '',
     phone: '',
-    document_type: '',
+    document_type: 'RUT',
     document_number: '',
     role_id: '',
     branch_id: '',
@@ -114,10 +112,19 @@ export default function UsersPage() {
     setDocumentError('');
   };
 
+  const handlePhoneChange = (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 9);
+    setFormData({ ...formData, phone: digits });
+  };
+
   const handleDocumentNumberChange = (value: string) => {
-    const cleaned = value.replace(/[^0-9kK\-\.]/g, '');
-    const formatted = formData.document_type === 'RUT' ? formatRUT(cleaned) : cleaned;
-    setFormData({ ...formData, document_number: formatted });
+    if (formData.document_type === 'RUT') {
+      const cleaned = value.replace(/[^0-9kK\-\.]/g, '');
+      const formatted = formatRUT(cleaned);
+      setFormData({ ...formData, document_number: formatted });
+    } else {
+      setFormData({ ...formData, document_number: value });
+    }
     setDocumentError('');
   };
 
@@ -137,7 +144,9 @@ export default function UsersPage() {
 
     const submitData = {
       ...formData,
-      document_number: formData.document_number.replace(/\./g, '').replace(/-/g, ''),
+      document_number: formData.document_number
+        ? formData.document_number.replace(/\./g, '').replace(/-/g, '')
+        : '',
     };
 
     try {
@@ -199,7 +208,7 @@ export default function UsersPage() {
       first_name: '',
       last_name: '',
       phone: '',
-      document_type: '',
+      document_type: 'RUT',
       document_number: '',
       role_id: '',
       branch_id: '',
@@ -210,6 +219,11 @@ export default function UsersPage() {
   const openCreateModal = () => {
     resetForm();
     setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    resetForm();
+    setIsModalOpen(false);
   };
 
   if (loading) {
@@ -275,11 +289,11 @@ export default function UsersPage() {
 
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         title={editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}
         footer={
           <>
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+            <Button variant="outline" onClick={handleCloseModal}>
               Cancelar
             </Button>
             <Button onClick={handleSubmit}>
@@ -288,7 +302,7 @@ export default function UsersPage() {
           </>
         }
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
           <Input
             label="Email"
             type="email"
@@ -302,6 +316,7 @@ export default function UsersPage() {
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              autoComplete="new-password"
               required
             />
           )}
@@ -317,11 +332,22 @@ export default function UsersPage() {
               onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
             />
           </div>
-          <Input
-            label="Teléfono"
-            value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+            <div className="flex">
+              <span className="inline-flex items-center px-3 border border-r-0 border-gray-300 rounded-l-lg bg-gray-50 text-gray-500 text-sm">
+                +56
+              </span>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => handlePhoneChange(e.target.value)}
+                placeholder="9 1234 5678"
+                maxLength={9}
+                className="w-full px-4 py-3 border border-gray-300 rounded-r-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <Select
               label="Tipo Documento"
@@ -330,12 +356,21 @@ export default function UsersPage() {
               options={DOCUMENT_OPTIONS}
             />
             <div>
-              <Input
-                label="Número Documento"
-                value={formData.document_number}
-                onChange={(e) => handleDocumentNumberChange(e.target.value)}
-                placeholder={formData.document_type === 'RUT' ? '12.345.678-5' : ''}
-              />
+              {formData.document_type === 'RUT' ? (
+                <Input
+                  label="Número Documento"
+                  value={formData.document_number}
+                  onChange={(e) => handleDocumentNumberChange(e.target.value)}
+                  placeholder="12.345.678-5"
+                />
+              ) : (
+                <Input
+                  label="Número Documento"
+                  value={formData.document_number}
+                  onChange={(e) => handleDocumentNumberChange(e.target.value)}
+                  placeholder="Ingrese número"
+                />
+              )}
               {documentError && (
                 <p className="text-red-500 text-xs mt-1">{documentError}</p>
               )}
