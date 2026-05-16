@@ -136,4 +136,34 @@ export const companyAPI = {
   getAll: () => api.get<{ companies: any[] }>('/companies'),
 };
 
+export const categoriesAPI = {
+  getAll: (params?: Record<string, string>) => {
+    const query = params ? '?' + new URLSearchParams(params).toString() : '';
+    return api.get<{ categories: any[] }>(`/inventory/categories${query}`);
+  },
+  create: (data: any) => api.post<{ category: any }>('/inventory/categories', data),
+  update: (id: number, data: any) => api.put<{ category: any }>(`/inventory/categories/${id}`, data),
+  delete: (id: number) => api.delete<{ message: string }>(`/inventory/categories/${id}`),
+};
+
+export const itemsAPI = {
+  getAll: (params?: Record<string, string>) => {
+    const query = params ? '?' + new URLSearchParams(params).toString() : '';
+    return api.get<{ items: any[]; pagination: any }>(`/inventory/items${query}`);
+  },
+  getById: (id: number) => api.get<{ item: any }>(`/inventory/items/${id}`),
+  create: (data: any) => api.post<{ item: any }>('/inventory/items', data),
+  update: (id: number, data: any) => api.put<{ item: any }>(`/inventory/items/${id}`, data),
+  delete: (id: number) => api.delete<{ message: string }>(`/inventory/items/${id}`),
+};
+
+export const stockAPI = {
+  getAll: (params?: Record<string, string>) => {
+    const query = params ? '?' + new URLSearchParams(params).toString() : '';
+    return api.get<{ stock: any[] }>(`/inventory/stock${query}`);
+  },
+  adjust: (data: { item_id: number; branch_id: number; quantity: number }) =>
+    api.post<{ stock: any }>('/inventory/stock/adjust', data),
+};
+
 export default api;

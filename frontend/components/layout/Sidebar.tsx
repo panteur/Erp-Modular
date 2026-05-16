@@ -6,6 +6,7 @@ import { useAuth } from '@/components/context/AuthContext';
 
 const menuItems = [
   { name: 'Seguridad', href: '/dashboard/security', icon: 'shield' },
+  { name: 'Inventario', href: '/dashboard/inventory', icon: 'package' },
   { name: 'Configuración', href: '/dashboard/settings', icon: 'settings' },
 ];
 
@@ -31,7 +32,7 @@ export default function Sidebar() {
                 : 'text-gray-300 hover:bg-gray-800'
             }`}
           >
-            <span className="text-lg">{item.icon === 'shield' ? '🛡️' : '⚙️'}</span>
+            <span className="text-lg">{item.icon === 'shield' ? '🛡️' : item.icon === 'package' ? '📦' : '⚙️'}</span>
             <span>{item.name}</span>
           </Link>
         ))}
@@ -59,6 +60,19 @@ export default function Sidebar() {
           >
             <span>🔑</span>
             <span>Roles</span>
+          </Link>
+        </div>
+
+        <div className="pt-4 border-t border-gray-700 mt-4">
+          <p className="px-4 text-xs text-gray-500 uppercase">Inventario</p>
+          <Link href="/dashboard/inventory/products" className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${pathname === '/dashboard/inventory/products' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800'}`}>
+            <span>📦</span><span>Productos</span>
+          </Link>
+          <Link href="/dashboard/inventory/services" className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${pathname === '/dashboard/inventory/services' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800'}`}>
+            <span>🔧</span><span>Servicios</span>
+          </Link>
+          <Link href="/dashboard/inventory/stock" className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${pathname === '/dashboard/inventory/stock' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800'}`}>
+            <span>📊</span><span>Stock</span>
           </Link>
         </div>
 

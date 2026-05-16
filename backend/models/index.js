@@ -6,6 +6,9 @@ const User = require('./User');
 const UserProfile = require('./UserProfile');
 const UserSession = require('./UserSession');
 const CompanyModule = require('./CompanyModule');
+const Category = require('./Category');
+const Item = require('./Item');
+const Inventory = require('./Inventory');
 
 Company.hasMany(Branch, { foreignKey: 'company_id', as: 'branches' });
 Branch.belongsTo(Company, { foreignKey: 'company_id', as: 'company' });
@@ -42,6 +45,21 @@ SystemModule.belongsToMany(Company, {
   as: 'companies'
 });
 
+Company.hasMany(Category, { foreignKey: 'company_id', as: 'categories' });
+Category.belongsTo(Company, { foreignKey: 'company_id', as: 'company' });
+
+Category.hasMany(Item, { foreignKey: 'category_id', as: 'items' });
+Item.belongsTo(Category, { foreignKey: 'category_id', as: 'category' });
+
+Company.hasMany(Item, { foreignKey: 'company_id', as: 'companyItems' });
+Item.belongsTo(Company, { foreignKey: 'company_id', as: 'company' });
+
+Item.hasMany(Inventory, { foreignKey: 'item_id', as: 'stockEntries' });
+Inventory.belongsTo(Item, { foreignKey: 'item_id', as: 'item' });
+
+Branch.hasMany(Inventory, { foreignKey: 'branch_id', as: 'stockEntries' });
+Inventory.belongsTo(Branch, { foreignKey: 'branch_id', as: 'branch' });
+
 module.exports = {
   Company,
   Branch,
@@ -50,5 +68,8 @@ module.exports = {
   User,
   UserProfile,
   UserSession,
-  CompanyModule
+  CompanyModule,
+  Category,
+  Item,
+  Inventory
 };
