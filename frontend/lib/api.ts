@@ -80,6 +80,9 @@ export const authAPI = {
   refresh: (refresh_token: string) => 
     api.post<{ access_token: string; refresh_token: string }>('/auth/refresh', { refresh_token }),
   me: () => api.get<{ user: any }>('/auth/me'),
+  forgotPassword: (email: string) => api.post<{ message: string }>('/auth/forgot-password', { email }),
+  resetPassword: (token: string, new_password: string) => 
+    api.post<{ message: string }>('/auth/reset-password', { token, new_password }),
 };
 
 export const usersAPI = {
@@ -93,6 +96,7 @@ export const usersAPI = {
   delete: (id: number) => api.delete<{ message: string }>(`/users/${id}`),
   changePassword: (id: number, data: { current_password: string; new_password: string }) => 
     api.put(`/users/${id}/password`, data),
+  sendResetPassword: (id: number) => api.post<{ message: string }>(`/users/${id}/send-reset-password`),
 };
 
 export const rolesAPI = {

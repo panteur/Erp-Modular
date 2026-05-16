@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usersAPI, rolesAPI } from '@/lib/api';
+import { usersAPI, rolesAPI, authAPI } from '@/lib/api';
 import { Button, Input, Select, Modal, Card } from '@/components/ui';
 import { Table, TableRow, TableCell } from '@/components/ui';
 
@@ -181,6 +181,16 @@ export default function UsersPage() {
     }
   };
 
+  const handleSendReset = async (id: number) => {
+    if (!confirm('¿Enviar correo de restablecimiento de contraseña a este usuario?')) return;
+    try {
+      const res = await usersAPI.sendResetPassword(id);
+      alert(res.message || 'Correo enviado correctamente');
+    } catch (error: any) {
+      alert(error.message || 'Error al enviar correo');
+    }
+  };
+
   const resetForm = () => {
     setEditingUser(null);
     setFormData({
@@ -240,13 +250,19 @@ export default function UsersPage() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEdit(user)}
-                    className="text-blue-600 hover:text-blue-800"
+                    className="text-blue-600 hover:text-blue-800 text-sm"
                   >
                     Editar
                   </button>
                   <button
+                    onClick={() => handleSendReset(user.id)}
+                    className="text-amber-600 hover:text-amber-800 text-sm"
+                  >
+                    Reset
+                  </button>
+                  <button
                     onClick={() => handleDelete(user.id)}
-                    className="text-red-600 hover:text-red-800"
+                    className="text-red-600 hover:text-red-800 text-sm"
                   >
                     Eliminar
                   </button>

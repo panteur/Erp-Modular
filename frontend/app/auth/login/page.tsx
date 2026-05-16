@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
@@ -71,7 +72,7 @@ export default function LoginPage() {
             />
           </div>
 
-          <div className="mb-6">
+          <div className="mb-2">
             <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="password">
               Contraseña
             </label>
@@ -85,6 +86,12 @@ export default function LoginPage() {
               required
               autoComplete="current-password"
             />
+          </div>
+
+          <div className="mb-6 text-right">
+            <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:text-blue-800">
+              ¿Olvidaste tu contraseña?
+            </Link>
           </div>
 
           <button

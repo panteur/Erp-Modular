@@ -83,10 +83,29 @@ const changePasswordValidation = [
     .withMessage('Nueva contraseña mínimo 6 caracteres')
 ];
 
+const forgotPasswordValidation = [
+  body('email')
+    .isEmail()
+    .withMessage('Email inválido')
+    .normalizeEmail()
+];
+
+const resetPasswordValidation = [
+  body('token')
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage('Token requerido'),
+  body('new_password')
+    .isLength({ min: 6 })
+    .withMessage('Nueva contraseña mínimo 6 caracteres')
+];
+
 module.exports = {
   loginValidation,
   registerValidation,
   userValidation,
   roleValidation,
-  changePasswordValidation
+  changePasswordValidation,
+  forgotPasswordValidation,
+  resetPasswordValidation
 };

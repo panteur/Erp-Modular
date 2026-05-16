@@ -1,6 +1,8 @@
 const { User, UserProfile, Role, Company, Branch, UserSession } = require('../models');
 const { comparePassword } = require('../utils/password');
 const { generateAccessToken, generateRefreshToken, verifyToken } = require('../utils/jwt');
+const { generateResetToken, verifyResetToken } = require('../utils/passwordReset');
+const { sendMail } = require('../utils/mail');
 const crypto = require('crypto');
 
 const loginAttempts = new Map();
@@ -234,9 +236,87 @@ const me = async (req, res) => {
   }
 };
 
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      return res.json({ message: 'Si el email existe, recibirás un enlace para restablecer tu contraseña' });
+    }
+
+    const resetToken = generateResetToken(user);
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/reset-password?token=${resetToken}`;
+
+    await sendMail({
+      to: email,
+      subject: 'Restablece tu contraseña - ERP Modular',
+      html: `
+        <div style="font-family:Arial;max-width:600px;margin:auto">
+          <div style="background:#2563eb;color:white;padding:24px;text-align:center;border-radius:8px 8px 0 0">
+            <h1 style="margin:0">ERP Modular</h1>
+          </div>
+          <div style="padding:32px;background:#f8fafc;border:1px solid #e2e8f0">
+            <h2>Restablece tu contraseña</h2>
+            <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta.</p>
+            <p>Este enlace es válido por <strong>15 minutos</strong>.</p>
+            <p style="text-align:center;margin-top:24px">
+              <a href="${resetUrl}"
+                 style="background:#2563eb;color:white;padding:12px 32px;border-radius:6px;text-decoration:none;display:inline-block">
+                Restablecer Contraseña
+              </a>
+            </p>
+            <p style="color:#94a3b8;font-size:13px;margin-top:24px">
+              Si no solicitaste este cambio, puedes ignorar este correo.
+            </p>
+          </div>
+          <div style="text-align:center;padding:16px;color:#94a3b8;font-size:12px">
+            ERP Modular - Sistema de Gestión Empresarial
+          </div>
+        </div>
+      `
+    });
+
+    res.json({ message: 'Si el email existe, recibirás un enlace para restablecer tu contraseña' });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ error: 'Error al procesar la solicitud' });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { token, new_password } = req.body;
+
+    const decoded = verifyResetToken(token);
+    if (!decoded) {
+      return res.status(400).json({ error: 'Enlace inválido o expirado. Solicita un nuevo restablecimiento.' });
+    }
+
+    const user = await User.findByPk(decoded.id);
+    if (!user || !user.is_active) {
+      return res.status(400).json({ error: 'Usuario no encontrado o inactivo' });
+    }
+
+    const { hashPassword } = require('../utils/password');
+    const passwordHash = await hashPassword(new_password);
+    await user.update({ password_hash: passwordHash });
+
+    await UserSession.destroy({ where: { user_id: user.id } });
+
+    res.json({ message: 'Contraseña actualizada correctamente. Puedes iniciar sesión con tu nueva contraseña.' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ error: 'Error al restablecer la contraseña' });
+  }
+};
+
 module.exports = {
   login,
   logout,
   refresh,
-  me
+  me,
+  forgotPassword,
+  resetPassword
 };

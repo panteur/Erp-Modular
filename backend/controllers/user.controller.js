@@ -1,6 +1,7 @@
 const { User, UserProfile, Role, Company, Branch, UserSession } = require('../models');
 const { hashPassword, comparePassword } = require('../utils/password');
 const { validateRUT } = require('../utils/rut');
+const { generateResetToken } = require('../utils/passwordReset');
 const { sendMail } = require('../utils/mail');
 const { Op } = require('sequelize');
 
@@ -245,11 +246,64 @@ const remove = async (req, res) => {
   }
 };
 
+const sendResetPassword = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.params.id, {
+      include: [{ model: UserProfile, as: 'profile' }]
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    if (!user.is_active) {
+      return res.status(400).json({ error: 'No se puede restablecer la contraseña de un usuario inactivo' });
+    }
+
+    const resetToken = generateResetToken(user);
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/reset-password?token=${resetToken}`;
+
+    const name = user.profile?.first_name || user.email;
+
+    await sendMail({
+      to: user.email,
+      subject: 'Restablecimiento de contraseña - ERP Modular',
+      html: `
+        <div style="font-family:Arial;max-width:600px;margin:auto">
+          <div style="background:#2563eb;color:white;padding:24px;text-align:center;border-radius:8px 8px 0 0">
+            <h1 style="margin:0">ERP Modular</h1>
+          </div>
+          <div style="padding:32px;background:#f8fafc;border:1px solid #e2e8f0">
+            <h2>Hola ${name},</h2>
+            <p>Un administrador solicitó el restablecimiento de tu contraseña.</p>
+            <p>Este enlace es válido por <strong>15 minutos</strong>.</p>
+            <p style="text-align:center;margin-top:24px">
+              <a href="${resetUrl}"
+                 style="background:#2563eb;color:white;padding:12px 32px;border-radius:6px;text-decoration:none;display:inline-block">
+                Restablecer Contraseña
+              </a>
+            </p>
+          </div>
+          <div style="text-align:center;padding:16px;color:#94a3b8;font-size:12px">
+            ERP Modular - Sistema de Gestión Empresarial
+          </div>
+        </div>
+      `
+    });
+
+    res.json({ message: 'Correo de restablecimiento enviado correctamente' });
+  } catch (error) {
+    console.error('Send reset password error:', error);
+    res.status(500).json({ error: 'Error al enviar el correo de restablecimiento' });
+  }
+};
+
 module.exports = {
   getAll,
   getById,
   create,
   update,
   changePassword,
-  remove
+  remove,
+  sendResetPassword
 };
