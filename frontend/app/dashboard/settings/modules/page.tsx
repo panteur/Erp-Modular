@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { modulesAPI } from '@/lib/api';
-import { Button, Card } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { useAuth } from '@/components/context/AuthContext';
 
 interface Module {

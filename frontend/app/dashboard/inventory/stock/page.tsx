@@ -79,7 +79,7 @@ export default function StockPage() {
             </TableRow>
           ))}
           {stock.length === 0 && (
-            <TableRow><TableCell colSpan={6} className="text-center text-gray-400 py-8">Sin registros de stock</TableCell></TableRow>
+            <TableRow><td colSpan={6} className="text-center text-gray-400 py-8">Sin registros de stock</td></TableRow>
           )}
         </Table>
       </Card>

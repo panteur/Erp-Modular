@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authAPI } from '@/lib/api';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 interface UserProfile {
   first_name: string;
@@ -41,7 +41,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
     checkAuth();
@@ -54,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const response = await authAPI.me();
         setUser(response.user);
       }
-    } catch (error) {
+    } catch (_error) {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
     } finally {

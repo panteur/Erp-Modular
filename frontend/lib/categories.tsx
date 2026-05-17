@@ -5,7 +5,7 @@ export interface Category {
   type: 'product' | 'service' | 'both';
   parent_id: number | null;
   parent: { id: number; name: string } | null;
-  children: { id: number; name: string }[];
+  children: Category[];
   is_active: boolean;
 }
 

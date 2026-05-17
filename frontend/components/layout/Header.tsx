@@ -1,7 +1,6 @@
 'use client';
 
 import { useAuth } from '@/components/context/AuthContext';
-import Link from 'next/link';
 
 export default function Header() {
   const { user, logout } = useAuth();

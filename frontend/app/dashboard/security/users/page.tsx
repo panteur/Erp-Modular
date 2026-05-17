@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usersAPI, rolesAPI, branchesAPI, authAPI } from '@/lib/api';
+import { usersAPI, rolesAPI, branchesAPI } from '@/lib/api';
 import { Button, Input, Select, Modal, Card } from '@/components/ui';
 import { Table, TableRow, TableCell } from '@/components/ui';
 
@@ -28,8 +28,6 @@ interface Role {
   id: number;
   name: string;
 }
-
-const RUT_REGEX = /^(\d{1,3}(?:\.?\d{3}){0,2}-?[0-9Kk])$/;
 
 const validateRUT = (rut: string): boolean => {
   const cleaned = rut.replace(/\./g, '').replace(/-/g, '').toUpperCase();
