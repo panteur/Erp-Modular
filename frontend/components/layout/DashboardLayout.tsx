@@ -33,9 +33,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-gray-100">
       <Sidebar />
-      <div className={`min-h-screen flex flex-col transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
+      <div className={`min-h-screen flex flex-col transition-all duration-300 md:ml-0 ${isCollapsed ? 'md:ml-16' : 'md:ml-64'}`}>
         <Header />
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-4 lg:p-6">
           {children}
         </main>
       </div>
