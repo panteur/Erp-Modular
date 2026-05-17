@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react';
 import { itemsAPI, categoriesAPI } from '@/lib/api';
 import { Button, Input, Select, Modal, Card } from '@/components/ui';
 import { Table, TableRow, TableCell } from '@/components/ui';
+import { renderCategorySelectOptions } from '@/lib/categories';
+import type { Category } from '@/lib/categories';
 
 export default function ServicesPage() {
   const [items, setItems] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -114,7 +116,7 @@ export default function ServicesPage() {
         <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
           <Input label="Nombre" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
           <Select label="Categoría" value={form.category_id} onChange={(e) => setForm({ ...form, category_id: e.target.value })}
-            options={[{ value: '', label: 'Sin categoría' }, ...categories.map((c) => ({ value: c.id.toString(), label: c.name }))]} />
+            options={[{ value: '', label: 'Sin categoría' }, ...renderCategorySelectOptions(categories).map(o => ({ value: o.value, label: o.label }))]} />
           <div className="grid grid-cols-3 gap-4">
             <Input label="Precio Venta" type="number" step="0.01" value={form.sale_price} onChange={(e) => setForm({ ...form, sale_price: e.target.value })} />
             <Input label="Precio Costo" type="number" step="0.01" value={form.cost_price} onChange={(e) => setForm({ ...form, cost_price: e.target.value })} />

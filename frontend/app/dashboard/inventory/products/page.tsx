@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react';
 import { itemsAPI, categoriesAPI } from '@/lib/api';
 import { Button, Input, Select, Modal, Card } from '@/components/ui';
 import { Table, TableRow, TableCell } from '@/components/ui';
+import { renderCategorySelectOptions } from '@/lib/categories';
+import type { Category } from '@/lib/categories';
 
 export default function ProductsPage() {
   const [items, setItems] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -141,7 +143,7 @@ export default function ProductsPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <Select label="Categoría" value={form.category_id} onChange={(e) => setForm({ ...form, category_id: e.target.value })}
-              options={[{ value: '', label: 'Sin categoría' }, ...categories.map((c) => ({ value: c.id.toString(), label: c.name }))]} />
+              options={[{ value: '', label: 'Sin categoría' }, ...renderCategorySelectOptions(categories).map(o => ({ value: o.value, label: o.label }))]} />
             <Select label="Unidad" value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })}
               options={[{ value: 'unidad', label: 'Unidad' }, { value: 'kg', label: 'Kilogramo' }, { value: 'litro', label: 'Litro' }, { value: 'metro', label: 'Metro' }, { value: 'caja', label: 'Caja' }, { value: 'pack', label: 'Pack' }]} />
           </div>
