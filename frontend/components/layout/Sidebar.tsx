@@ -74,6 +74,9 @@ export default function Sidebar() {
           <Link href="/dashboard/inventory/stock" className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${pathname === '/dashboard/inventory/stock' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800'}`}>
             <span>📊</span><span>Stock</span>
           </Link>
+          <Link href="/dashboard/inventory/categories" className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${pathname === '/dashboard/inventory/categories' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800'}`}>
+            <span>🏷️</span><span>Categorías</span>
+          </Link>
         </div>
 
         <div className="pt-4 border-t border-gray-700 mt-4">

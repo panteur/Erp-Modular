@@ -19,6 +19,11 @@ const Category = sequelize.define('Category', {
   description: {
     type: DataTypes.STRING(255)
   },
+  parent_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: { model: 'categories', key: 'id' }
+  },
   type: {
     type: DataTypes.ENUM('product', 'service', 'both'),
     defaultValue: 'both'

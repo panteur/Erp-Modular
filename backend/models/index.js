@@ -48,6 +48,9 @@ SystemModule.belongsToMany(Company, {
 Company.hasMany(Category, { foreignKey: 'company_id', as: 'categories' });
 Category.belongsTo(Company, { foreignKey: 'company_id', as: 'company' });
 
+Category.hasMany(Category, { foreignKey: 'parent_id', as: 'children' });
+Category.belongsTo(Category, { foreignKey: 'parent_id', as: 'parent' });
+
 Category.hasMany(Item, { foreignKey: 'category_id', as: 'items' });
 Item.belongsTo(Category, { foreignKey: 'category_id', as: 'category' });
 

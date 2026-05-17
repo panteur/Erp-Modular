@@ -2,7 +2,7 @@ const { Item, Category, Inventory, Branch } = require('../models');
 const { Op } = require('sequelize');
 
 const itemIncludes = [
-  { model: Category, as: 'category', attributes: ['id', 'name'] }
+  { model: Category, as: 'category', include: [{ model: Category, as: 'parent', attributes: ['id', 'name'] }] }
 ];
 
 const getAll = async (req, res) => {

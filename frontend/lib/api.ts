@@ -141,6 +141,8 @@ export const categoriesAPI = {
     const query = params ? '?' + new URLSearchParams(params).toString() : '';
     return api.get<{ categories: any[] }>(`/inventory/categories${query}`);
   },
+  getById: (id: number) => api.get<{ category: any }>(`/inventory/categories/${id}`),
+  getParents: () => api.get<{ categories: any[] }>('/inventory/categories/parents'),
   create: (data: any) => api.post<{ category: any }>('/inventory/categories', data),
   update: (id: number, data: any) => api.put<{ category: any }>(`/inventory/categories/${id}`, data),
   delete: (id: number) => api.delete<{ message: string }>(`/inventory/categories/${id}`),

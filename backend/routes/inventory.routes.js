@@ -8,6 +8,7 @@ const inventoryController = require('../controllers/inventory.controller');
 router.use(authenticate);
 
 router.get('/categories', categoryController.getAll);
+router.get('/categories/parents', categoryController.getParents);
 router.get('/categories/:id', categoryController.getById);
 router.post('/categories', categoryController.create);
 router.put('/categories/:id', categoryController.update);
