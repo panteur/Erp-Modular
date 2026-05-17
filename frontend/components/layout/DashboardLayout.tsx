@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/components/context/AuthContext';
+import { useSidebar } from '@/components/context/SidebarContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import Sidebar from './Sidebar';
@@ -8,6 +9,7 @@ import Header from './Header';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
+  const { isCollapsed } = useSidebar();
   const router = useRouter();
 
   useEffect(() => {
@@ -31,7 +33,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-gray-100">
       <Sidebar />
-      <div className="ml-64 min-h-screen flex flex-col">
+      <div className={`min-h-screen flex flex-col transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
         <Header />
         <main className="flex-1 p-6">
           {children}
