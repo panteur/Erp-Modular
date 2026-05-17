@@ -159,6 +159,12 @@ export const itemsAPI = {
   delete: (id: number) => api.delete<{ message: string }>(`/inventory/items/${id}`),
 };
 
+export const notificationsAPI = {
+  getMine: () => api.get<{ notifications: any[]; unreadCount: number }>('/notifications'),
+  markAsRead: (id: number) => api.put(`/notifications/${id}/read`),
+  markAllAsRead: () => api.put('/notifications/read-all'),
+};
+
 export const stockAPI = {
   getAll: (params?: Record<string, string>) => {
     const query = params ? '?' + new URLSearchParams(params).toString() : '';

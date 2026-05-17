@@ -9,6 +9,7 @@ const CompanyModule = require('./CompanyModule');
 const Category = require('./Category');
 const Item = require('./Item');
 const Inventory = require('./Inventory');
+const Notification = require('./Notification');
 
 Company.hasMany(Branch, { foreignKey: 'company_id', as: 'branches' });
 Branch.belongsTo(Company, { foreignKey: 'company_id', as: 'company' });
@@ -63,6 +64,9 @@ Inventory.belongsTo(Item, { foreignKey: 'item_id', as: 'item' });
 Branch.hasMany(Inventory, { foreignKey: 'branch_id', as: 'stockEntries' });
 Inventory.belongsTo(Branch, { foreignKey: 'branch_id', as: 'branch' });
 
+User.hasMany(Notification, { foreignKey: 'user_id', as: 'notifications' });
+Notification.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
 module.exports = {
   Company,
   Branch,
@@ -74,5 +78,6 @@ module.exports = {
   CompanyModule,
   Category,
   Item,
-  Inventory
+  Inventory,
+  Notification
 };

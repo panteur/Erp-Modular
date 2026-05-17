@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/components/context/AuthContext';
 import { useSidebar } from '@/components/context/SidebarContext';
+import NotificationsBell from '@/components/ui/NotificationsBell';
 
 function Hamburger() {
   return (
@@ -32,7 +33,8 @@ export default function Header() {
             Bienvenido, {user?.profile?.first_name || 'Usuario'}
           </h2>
         </div>
-        <div className="flex items-center gap-3 lg:gap-4">
+        <div className="flex items-center gap-2 lg:gap-4">
+          <NotificationsBell />
           <div className="hidden sm:block text-right">
             <p className="text-sm text-gray-600">{user?.email}</p>
             <p className="text-xs text-gray-500">{user?.role?.name}</p>

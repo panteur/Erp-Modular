@@ -1,5 +1,6 @@
 const { Inventory, Item, Category, Branch } = require('../models');
 const { Op } = require('sequelize');
+const { notifyLowStock } = require('../utils/notifications');
 
 const getAll = async (req, res) => {
   try {
@@ -64,6 +65,11 @@ const adjust = async (req, res) => {
     });
 
     await stock.update({ quantity });
+
+    if (quantity <= item.stock_min) {
+      const branch = await Branch.findByPk(branch_id);
+      if (branch) notifyLowStock(item, branch, quantity);
+    }
 
     res.json({ stock });
   } catch (error) {

@@ -37,6 +37,7 @@ const branchRoutes = require('./routes/branch.routes');
 const moduleRoutes = require('./routes/module.routes');
 const companyRoutes = require('./routes/company.routes');
 const inventoryRoutes = require('./routes/inventory.routes');
+const notificationRoutes = require('./routes/notification.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -45,6 +46,7 @@ app.use('/api/branches', branchRoutes);
 app.use('/api/modules', moduleRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/inventory', inventoryRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
