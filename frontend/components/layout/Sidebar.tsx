@@ -32,9 +32,58 @@ const subItems: Record<string, { name: string; href: string; icon: string }[]> =
 function Hamburger({ open }: { open: boolean }) {
   return (
     <div className="relative w-5 h-4">
-      <span className={`absolute left-0 top-0 block h-0.5 w-full bg-current rounded transition-all duration-200 ${open ? 'top-1.5 rotate-45' : ''}`} />
-      <span className={`absolute left-0 top-1.5 block h-0.5 w-full bg-current rounded transition-all duration-200 ${open ? 'opacity-0' : ''}`} />
-      <span className={`absolute left-0 bottom-0 block h-0.5 w-full bg-current rounded transition-all duration-200 ${open ? 'bottom-1.5 -rotate-45' : ''}`} />
+      <span className={`absolute left-0 top-0 block h-0.5 w-full bg-current rounded-full transition-all duration-200 ${open ? 'top-1.5 rotate-45' : ''}`} />
+      <span className={`absolute left-0 top-1.5 block h-0.5 w-full bg-current rounded-full transition-all duration-200 ${open ? 'opacity-0' : ''}`} />
+      <span className={`absolute left-0 bottom-0 block h-0.5 w-full bg-current rounded-full transition-all duration-200 ${open ? 'bottom-1.5 -rotate-45' : ''}`} />
+    </div>
+  );
+}
+
+function NavItem({ item, isCollapsed, pathname, onClick }: {
+  item: typeof menuItems[0];
+  isCollapsed: boolean;
+  pathname: string;
+  onClick?: () => void;
+}) {
+  const children = subItems[item.name] || [];
+  const isActive = pathname.startsWith(item.href);
+  const hasActiveChild = children.some(c => pathname === c.href);
+
+  return (
+    <div>
+      <Link
+        href={item.href}
+        onClick={onClick}
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm font-medium ${
+          isActive || hasActiveChild
+            ? 'bg-accent-600/10 text-accent-500'
+            : 'text-slate-300 hover:text-white hover:bg-white/5'
+        } ${isCollapsed ? 'justify-center' : ''}`}
+        title={isCollapsed ? item.name : undefined}
+      >
+        <span className="text-lg shrink-0">{item.icon}</span>
+        {!isCollapsed && <span className="truncate">{item.name}</span>}
+      </Link>
+
+      {!isCollapsed && (isActive || hasActiveChild) && children.length > 0 && (
+        <div className="ml-3 mt-0.5 space-y-0.5 border-l border-white/10 pl-2">
+          {children.map((child) => (
+            <Link
+              key={child.href}
+              href={child.href}
+              onClick={onClick}
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm ${
+                pathname === child.href
+                  ? 'text-accent-400 font-medium'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <span className="text-sm shrink-0">{child.icon}</span>
+              <span className="truncate">{child.name}</span>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -46,10 +95,10 @@ export default function Sidebar() {
 
   const sidebarContent = (
     <div className="flex flex-col h-full">
-      <div className={`flex items-center border-b border-gray-700 shrink-0 ${isCollapsed ? 'justify-center p-3' : 'p-4'}`}>
+      <div className={`flex items-center border-b border-white/5 shrink-0 ${isCollapsed ? 'justify-center p-3' : 'p-4'}`}>
         <button
           onClick={toggle}
-          className="text-gray-300 hover:text-white transition-colors shrink-0"
+          className="text-slate-400 hover:text-white transition-colors shrink-0 p-1 rounded-lg hover:bg-white/5"
           title={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
           aria-label="Toggle sidebar"
         >
@@ -57,73 +106,35 @@ export default function Sidebar() {
         </button>
         {!isCollapsed && (
           <div className="ml-3 min-w-0">
-            <h1 className="text-sm font-bold truncate">ERP Modular</h1>
-            <p className="text-[10px] text-gray-400 truncate">{user?.company?.name || ''}</p>
+            <h1 className="text-sm font-bold text-white tracking-tight">ERP Modular</h1>
+            <p className="text-[10px] text-slate-500 truncate font-medium tracking-wide uppercase">{user?.company?.name || ''}</p>
           </div>
         )}
       </div>
 
-      <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
-        {menuItems.map((item) => {
-          const isActive = pathname.startsWith(item.href);
-          const children = subItems[item.name] || [];
-          const hasActiveChild = children.some(c => pathname === c.href);
-
-          return (
-            <div key={item.href}>
-              <Link
-                href={item.href}
-                onClick={closeMobile}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm ${
-                  isActive || hasActiveChild ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800'
-                } ${isCollapsed ? 'justify-center' : ''}`}
-                title={isCollapsed ? item.name : undefined}
-              >
-                <span className="text-lg shrink-0">{item.icon}</span>
-                {!isCollapsed && <span className="truncate">{item.name}</span>}
-              </Link>
-
-              {!isCollapsed && (isActive || hasActiveChild) && children.length > 0 && (
-                <div className="ml-2 mt-0.5 space-y-0.5">
-                  {children.map((child) => (
-                    <Link
-                      key={child.href}
-                      href={child.href}
-                      onClick={closeMobile}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${
-                        pathname === child.href
-                          ? 'bg-blue-600 text-white'
-                          : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                      }`}
-                    >
-                      <span className="text-sm shrink-0">{child.icon}</span>
-                      <span className="truncate">{child.name}</span>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        {menuItems.map((item) => (
+          <NavItem key={item.href} item={item} isCollapsed={isCollapsed} pathname={pathname} />
+        ))}
       </nav>
 
       {isCollapsed ? (
-        <div className="p-3 border-t border-gray-700 flex justify-center shrink-0">
-          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-medium">
+        <div className="p-3 border-t border-white/5 flex justify-center shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-accent-600/20 flex items-center justify-center text-xs font-bold text-accent-400">
             {user?.profile?.first_name?.[0]}{user?.profile?.last_name?.[0] || ''}
           </div>
         </div>
       ) : (
-        <div className="p-4 border-t border-gray-700 shrink-0">
+        <div className="p-4 border-t border-white/5 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-sm font-medium shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-accent-600/20 flex items-center justify-center text-sm font-bold text-accent-400 shrink-0">
               {user?.profile?.first_name?.[0]}{user?.profile?.last_name?.[0] || ''}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">
+              <p className="text-sm font-medium text-slate-200 truncate">
                 {user?.profile?.first_name} {user?.profile?.last_name}
               </p>
-              <p className="text-xs text-gray-400 truncate">{user?.role?.name}</p>
+              <p className="text-xs text-slate-500 truncate font-medium">{user?.role?.name}</p>
             </div>
           </div>
         </div>
@@ -133,88 +144,44 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Desktop sidebar */}
-      <aside className={`fixed left-0 top-0 h-full bg-gray-900 text-white flex flex-col transition-all duration-300 z-30 hidden md:flex ${isCollapsed ? 'w-16' : 'w-64'}`}>
+      {/* Desktop */}
+      <aside className={`fixed left-0 top-0 h-full bg-sidebar text-white flex flex-col transition-all duration-300 z-30 hidden md:flex border-r border-white/5 ${isCollapsed ? 'w-16' : 'w-64'}`}>
         {sidebarContent}
       </aside>
 
-      {/* Mobile overlay backdrop */}
+      {/* Mobile backdrop */}
       {isMobileOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          onClick={closeMobile}
-        />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden" onClick={closeMobile} />
       )}
 
-      {/* Mobile sidebar */}
-      <aside className={`fixed left-0 top-0 h-full w-64 bg-gray-900 text-white flex flex-col transition-transform duration-300 z-50 md:hidden ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex items-center p-4 border-b border-gray-700 shrink-0">
-          <button
-            onClick={closeMobile}
-            className="text-gray-300 hover:text-white transition-colors mr-3"
-            aria-label="Close sidebar"
-          >
+      {/* Mobile */}
+      <aside className={`fixed left-0 top-0 h-full w-64 bg-sidebar text-white flex flex-col transition-transform duration-300 z-50 md:hidden border-r border-white/5 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex items-center p-4 border-b border-white/5 shrink-0">
+          <button onClick={closeMobile} className="text-slate-400 hover:text-white transition-colors mr-3 p-1 rounded-lg hover:bg-white/5" aria-label="Close sidebar">
             <Hamburger open />
           </button>
           <div className="min-w-0">
-            <h1 className="text-sm font-bold truncate">ERP Modular</h1>
-            <p className="text-[10px] text-gray-400 truncate">{user?.company?.name || ''}</p>
+            <h1 className="text-sm font-bold text-white tracking-tight">ERP Modular</h1>
+            <p className="text-[10px] text-slate-500 truncate font-medium tracking-wide uppercase">{user?.company?.name || ''}</p>
           </div>
         </div>
 
-        <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
-          {menuItems.map((item) => {
-            const isActive = pathname.startsWith(item.href);
-            const children = subItems[item.name] || [];
-            const hasActiveChild = children.some(c => pathname === c.href);
-
-            return (
-              <div key={item.href}>
-                <Link
-                  href={item.href}
-                  onClick={closeMobile}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm ${
-                    isActive || hasActiveChild ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800'
-                  }`}
-                >
-                  <span className="text-lg shrink-0">{item.icon}</span>
-                  <span className="truncate">{item.name}</span>
-                </Link>
-
-                {(isActive || hasActiveChild) && children.length > 0 && (
-                  <div className="ml-2 mt-0.5 space-y-0.5">
-                    {children.map((child) => (
-                      <Link
-                        key={child.href}
-                        href={child.href}
-                        onClick={closeMobile}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${
-                          pathname === child.href
-                            ? 'bg-blue-600 text-white'
-                            : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                        }`}
-                      >
-                        <span className="text-sm shrink-0">{child.icon}</span>
-                        <span className="truncate">{child.name}</span>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+          {menuItems.map((item) => (
+            <NavItem key={item.href} item={item} isCollapsed={false} pathname={pathname} onClick={closeMobile} />
+          ))}
         </nav>
 
-        <div className="p-4 border-t border-gray-700 shrink-0">
+        <div className="p-4 border-t border-white/5 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-sm font-medium shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-accent-600/20 flex items-center justify-center text-sm font-bold text-accent-400 shrink-0">
               {user?.profile?.first_name?.[0]}{user?.profile?.last_name?.[0] || ''}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">
+              <p className="text-sm font-medium text-slate-200 truncate">
                 {user?.profile?.first_name} {user?.profile?.last_name}
               </p>
-              <p className="text-xs text-gray-400 truncate">{user?.role?.name}</p>
+              <p className="text-xs text-slate-500 truncate font-medium">{user?.role?.name}</p>
             </div>
           </div>
         </div>

@@ -8,20 +8,20 @@ interface TableProps {
 export function Table({ headers, children }: TableProps) {
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+      <table className="min-w-full divide-y divide-slate-100">
+        <thead>
           <tr>
             {headers.map((header, index) => (
               <th
                 key={index}
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
               >
                 {header}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="divide-y divide-slate-100">
           {children}
         </tbody>
       </table>
@@ -30,9 +30,9 @@ export function Table({ headers, children }: TableProps) {
 }
 
 export function TableRow({ children }: { children: React.ReactNode }) {
-  return <tr className="hover:bg-gray-50">{children}</tr>;
+  return <tr className="transition-colors hover:bg-slate-50/80">{children}</tr>;
 }
 
 export function TableCell({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <td className={`px-6 py-4 whitespace-nowrap text-sm ${className}`}>{children}</td>;
+  return <td className={`px-6 py-4 whitespace-nowrap text-sm text-slate-600 ${className}`}>{children}</td>;
 }
